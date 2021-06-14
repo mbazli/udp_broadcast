@@ -52,6 +52,7 @@ int main(void)
         return error_handler(socked, "bind");
     }
 
+    // receive broadcast message from client
     struct sockaddr_in send_addr;
     char recv_buffer[25] = {0};
     int len = sizeof(send_addr);
@@ -60,15 +61,9 @@ int main(void)
         return error_handler(socked, "recvfrom");
     }
 
-    // get device IP address from pre-defined interface
-    struct ifreq ifr;
-    ifr.ifr_addr.sa_family = AF_INET;
-    strncpy(ifr.ifr_name, "wlp3s0", (IFNAMSIZ-1));
-    ioctl(socked, SIOCGIFADDR, &ifr);
-    printf("response broadcast with IP addr: %s\n", inet_ntoa(((struct sockaddr_in *) &ifr.ifr_addr)->sin_addr));
-
-    char* send_buffer = inet_ntoa(((struct sockaddr_in *) &ifr.ifr_addr)->sin_addr);
-    if(sendto(socked, send_buffer, strlen(send_buffer), 0, (struct sockaddr*) &send_addr, sizeof(send_addr)) < 0)
+    // send back dummy message
+    char send_buffer = 1;
+    if(sendto(socked, &send_buffer, sizeof(send_buffer), 0, (struct sockaddr*) &send_addr, sizeof(send_addr)) < 0)
     {
         return error_handler(socked, "sendto");
     }
