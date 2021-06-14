@@ -95,18 +95,26 @@ int main(void)
             {
                 return error_handler(socked, "sendto");
             }
+            printf("\n");
+        }
+    }
 
-            // waiting message response from device
-            char recv_buffer[25] = {0};
+    // another loop to receive message response from device
+    for(struct ifaddrs *ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
+    {
+        family = ifa->ifa_addr->sa_family;
+
+        // check for ipv4 family
+        if(family == AF_INET)
+        {
+            char buff[64] = {0};
+            char recv_buffer;
             struct sockaddr_in dev_addr;
             int len = sizeof(dev_addr);
-            if(recvfrom(socked, recv_buffer, sizeof(recv_buffer), 0, (struct sockaddr *) &dev_addr, &len) < 0)
+            if(recvfrom(socked, &recv_buffer, sizeof(recv_buffer), 0, (struct sockaddr *) &dev_addr, &len) > 0)
             {
-                printf("no response from: %s\n\n", ifa->ifa_name);
-            }
-            else
-            {
-                printf("response from: %s\n\n", recv_buffer);
+                inet_ntop(family, &dev_addr.sin_addr, buff, sizeof(buff));
+                printf("response from: %s\n", buff);
             }
         }
     }
